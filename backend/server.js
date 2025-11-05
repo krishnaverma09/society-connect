@@ -9,7 +9,7 @@ const app = express();
 // ✅ CORS FIX — must be the FIRST middleware
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173',"society-connect-five.vercel.app"],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
