@@ -11,7 +11,7 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
-  'https://society-connect-five.vercel.app', // frontend (Vercel)
+  'https://society-connect-five.vercel.app/', // frontend (Vercel)
   'https://society-connect-py70.onrender.com', // backend (Render) - only include if the backend needs to call itself cross-origin
 ];
 

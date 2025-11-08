@@ -37,9 +37,17 @@ const Signup = () => {
       // Redirect to dashboard
       navigate('/dashboard')
     } catch (err) {
-  // axios interceptor returns { message, status, original }
-  const msg = err?.message || (err?.original && err.original.message) || 'Signup failed. Please try again.'
-  setError(msg)
+      // Handle validation errors
+      if (err.original?.response?.data?.errors) {
+        const validationErrors = err.original.response.data.errors
+          .map(error => error.msg)
+          .join(', ');
+        setError(validationErrors);
+      } else {
+        // Handle other errors
+        const msg = err?.message || (err?.original && err.original.message) || 'Signup failed. Please try again.'
+        setError(msg);
+      }
     } finally {
       setLoading(false)
     }
