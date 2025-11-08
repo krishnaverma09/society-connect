@@ -25,7 +25,9 @@ const Login = () => {
     setLoading(true)
 
     try {
-      const response = await axios.post('/api/auth/login', formData)
+      const response = await axios.post("https://society-connect-py70.onrender.com/api/auth/signup", formData, {
+  withCredentials: true,
+});
       
       // Save token and user data to localStorage
       localStorage.setItem('token', response.data.token)
@@ -34,7 +36,9 @@ const Login = () => {
       // Redirect to dashboard
       navigate('/dashboard')
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please try again.')
+  // axios interceptor returns { message, status, original }
+  const msg = err?.message || (err?.original && err.original.message) || 'Login failed. Please try again.'
+  setError(msg)
     } finally {
       setLoading(false)
     }

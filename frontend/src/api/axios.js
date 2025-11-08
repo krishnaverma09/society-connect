@@ -1,8 +1,12 @@
 import axios from 'axios'
 
+// base URL should be the server origin (do NOT append '/api' here)
+const DEFAULT_API_BASE = 'http://localhost:3000'
+const apiBase = import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE
+
 // Create axios instance with base URL
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: apiBase,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -27,13 +31,18 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
+    // If unauthorized, clear auth and redirect
     if (error.response?.status === 401) {
-      // Token is invalid or expired
       localStorage.removeItem('token')
       localStorage.removeItem('user')
       window.location.href = '/'
+      return Promise.reject({ message: 'Unauthorized', status: 401, original: error })
     }
-    return Promise.reject(error)
+
+    // Normalize error message for callers
+    const serverMessage = error?.response?.data?.message || error?.response?.data || null
+    const message = serverMessage || error.message || 'Network or server error'
+    return Promise.reject({ message, status: error?.response?.status, original: error })
   }
 )
 

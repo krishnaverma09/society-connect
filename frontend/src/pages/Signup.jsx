@@ -37,7 +37,9 @@ const Signup = () => {
       // Redirect to dashboard
       navigate('/dashboard')
     } catch (err) {
-      setError(err.response?.data?.message || err.response?.data?.errors?.[0]?.msg || 'Signup failed. Please try again.')
+  // axios interceptor returns { message, status, original }
+  const msg = err?.message || (err?.original && err.original.message) || 'Signup failed. Please try again.'
+  setError(msg)
     } finally {
       setLoading(false)
     }
