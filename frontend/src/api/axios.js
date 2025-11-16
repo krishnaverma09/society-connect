@@ -1,8 +1,10 @@
 import axios from 'axios'
 
-// base URL should be the server origin (do NOT append '/api' here)
+// Base URL should be the server origin (do NOT append '/api' here)
 const DEFAULT_API_BASE = 'http://localhost:3000'
-const apiBase = import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE
+const apiBase =
+  import.meta.env.VITE_API_BASE_URL ||
+  (typeof window !== 'undefined' ? window.location.origin : DEFAULT_API_BASE)
 
 // Create axios instance with base URL
 const axiosInstance = axios.create({

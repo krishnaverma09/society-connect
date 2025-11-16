@@ -15,7 +15,8 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="navbar-container">
         <div className="navbar-brand">
-          <h2>🏢 SocietyConnect</h2>
+          <h2 style={{cursor: 'pointer'}} onClick={() => navigate('/dashboard')}>🏢 SocietyConnect</h2>
+          <button onClick={() => navigate('/notices')} className="nav-link-btn">Notices</button>
         </div>
         <div className="navbar-user">
           <span className="user-info">

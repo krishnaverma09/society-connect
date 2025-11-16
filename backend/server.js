@@ -47,12 +47,18 @@ const authRoutes = require('./routes/auth.routes');
 const complaintRoutes = require('./routes/complaint.routes');
 const paymentRoutes = require('./routes/payment.routes');
 const notificationRoutes = require('./routes/notification.routes');
+const noticeRoutes = require('./routes/notice.routes');
+const path = require('path');
 
 // ✅ routes
 app.use('/api/auth', authRoutes);
 app.use('/api/complaints', complaintRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/notifications', notificationRoutes);
+// serve uploads folder
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// mount notices
+app.use('/api/notices', noticeRoutes);
 
 // ✅ test route
 app.get('/', (req, res) => {

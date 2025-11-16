@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
+import NoticesPage from './pages/NoticesPage'
 import './App.css'
 
 // Protected Route Component
@@ -28,6 +29,14 @@ function App() {
               <Dashboard />
             </ProtectedRoute>
           } 
+        />
+        <Route
+          path="/notices"
+          element={
+            <ProtectedRoute>
+              <NoticesPage />
+            </ProtectedRoute>
+          }
         />
       </Routes>
     </Router>
