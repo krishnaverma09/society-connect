@@ -1,39 +1,71 @@
-require('dotenv').config();
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
+const path = require('path')
+require('dotenv').config({ path: path.join(__dirname, '.env') })
+const express = require('express')
+const mongoose = require('mongoose')
+const cors = require('cors')
 
 // initialize app
 const app = express();
 
 // ✅ CORS FIX — must be the FIRST middleware
-// whitelist of allowed origins (include deployed frontend and backend if needed)
-const allowedOrigins = [
+// Build allowed origins from env to keep configuration dynamic.
+const FRONTEND_URL = process.env.FRONTEND_URL || ''
+const allowedOrigins = new Set([
   'http://localhost:5173',
-  'http://localhost:3000',
-  'https://society-connect-five.vercel.app', // frontend (Vercel)
-  'https://society-connect-py70.onrender.com',
-  'https://society-connect-py70.onrender.com/api/auth/signup' // backend (Render) - only include if the backend needs to call itself cross-origin
-];
+  'http://127.0.0.1:5173',
+])
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // allow requests with no origin (like mobile apps, curl, Postman)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) !== -1) {
-        return callback(null, true);
-      } else {
-        const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
-        return callback(new Error(msg), false);
-      }
-    },
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-    optionsSuccessStatus: 200,
+// FRONTEND_URL can be a comma-separated list (for multiple deploys)
+if (FRONTEND_URL) {
+  FRONTEND_URL.split(',').map((u) => u.trim()).forEach((u) => {
+    if (!u) return
+    // accept both http and https variants if protocol omitted
+    allowedOrigins.add(u)
+    if (!u.startsWith('http')) {
+      allowedOrigins.add(`https://${u}`)
+      allowedOrigins.add(`http://${u}`)
+    }
   })
-);
+}
+
+// If running in production, require FRONTEND_URL to be set for security.
+if (process.env.NODE_ENV === 'production') {
+  if (!FRONTEND_URL) {
+    console.error('FATAL: FRONTEND_URL is required in production. Set FRONTEND_URL in your environment to the frontend origin (e.g. https://example.com)')
+    process.exit(1)
+  }
+}
+
+// If not running in production, allow all origins to prevent CORS issues during local dev.
+if (process.env.NODE_ENV !== 'production') {
+  console.log('CORS: development mode - allowing all origins')
+  app.use(
+    cors({
+      origin: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+      credentials: true,
+      optionsSuccessStatus: 200,
+    })
+  )
+} else {
+  console.log('CORS allowed origins:', Array.from(allowedOrigins))
+  app.use(
+    cors({
+      origin: function (origin, callback) {
+        // allow requests with no origin (like mobile apps, curl, Postman)
+        if (!origin) return callback(null, true)
+        if (allowedOrigins.has(origin)) return callback(null, true)
+        const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`
+        return callback(new Error(msg), false)
+      },
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+      credentials: true,
+      optionsSuccessStatus: 200,
+    })
+  )
+}
 
 // ✅ handle preflight (OPTIONS) manually for extra safety
 app.options('*', cors());
@@ -48,7 +80,6 @@ const complaintRoutes = require('./routes/complaint.routes');
 const paymentRoutes = require('./routes/payment.routes');
 const notificationRoutes = require('./routes/notification.routes');
 const noticeRoutes = require('./routes/notice.routes');
-const path = require('path');
 
 // ✅ routes
 app.use('/api/auth', authRoutes);

@@ -96,7 +96,7 @@ npm run seed
 npm run dev
 ```
 
-Backend will run on: `http://localhost:5000`
+Backend will run on the port defined by `PORT` in `backend/.env` (default: `3000`).
 
 ### 3. Setup Frontend
 
@@ -113,7 +113,7 @@ cp .env.example .env
 npm run dev
 ```
 
-Frontend will run on: `http://localhost:3000`
+Frontend dev server (Vite) typically runs on port `5173` by default; the frontend app uses `VITE_API_BASE_URL` to locate the backend API. Set `VITE_API_BASE_URL` in `frontend/.env` to your backend origin for production (for example `https://your-backend.onrender.com`).
 
 ## 🔑 Demo Credentials
 
@@ -231,14 +231,14 @@ After running the seed script, use these credentials:
 
 ### Backend Testing
 ```bash
-# Using curl
-curl -X POST http://localhost:5000/api/auth/login \
+# Using curl (replace <BACKEND_URL> with your backend origin)
+curl -X POST <BACKEND_URL>/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@site.com","password":"admin123"}'
 ```
 
 ### Frontend Testing
-1. Open `http://localhost:3000`
+1. Open the frontend URL printed by Vite (typically `http://localhost:5173`) or the URL shown in your terminal when running the dev server.
 2. Login with demo credentials
 3. Navigate through the dashboard
 4. Check complaints data

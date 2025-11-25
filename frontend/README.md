@@ -15,7 +15,7 @@ React + Vite frontend application for SocietyConnect - A society management syst
 
 - **Node.js** (v14 or higher)
 - **npm** or **yarn**
-- **Backend API** running on port 5000 (or update `.env`)
+- **Backend API** origin is configured via `VITE_API_BASE_URL` in `frontend/.env` (set it to your deployed backend origin for production). In development you can leave it blank to use the current window origin.
 
 ## 🛠️ Installation
 
@@ -30,14 +30,14 @@ React + Vite frontend application for SocietyConnect - A society management syst
    ```
 
 3. **Set up environment variables**:
-   - Copy `.env.example` to `.env`:
-     ```bash
-     cp .env.example .env
-     ```
-   - Update the `.env` file if your backend runs on a different URL:
-     ```
-     VITE_API_BASE_URL=http://localhost:5000
-     ```
+
+  Copy `.env.example` to `.env` and set `VITE_API_BASE_URL` to your backend origin for production. Leave it empty in development to use the window origin.
+
+  ```bash
+  cp .env.example .env
+  # Example (production):
+  # VITE_API_BASE_URL=https://your-backend.onrender.com
+  ```
 
 ## 🏃‍♂️ Running the Application
 
@@ -46,7 +46,7 @@ React + Vite frontend application for SocietyConnect - A society management syst
 npm run dev
 ```
 
-The app will start on `http://localhost:3000`
+The Vite dev server runs on port `5173` by default (the exact URL will be printed by Vite when the dev server starts). The frontend uses `VITE_API_BASE_URL` to connect to the backend.
 
 ### Build for Production:
 ```bash
@@ -152,7 +152,7 @@ After seeding the backend database:
 
 ## 📝 API Integration
 
-The frontend connects to the backend API at `http://localhost:5000` by default.
+The frontend connects to the backend API based on `VITE_API_BASE_URL` (set this in `frontend/.env` for production). If left blank, the frontend will use the window origin.
 
 **Endpoints used:**
 - `POST /api/auth/login` - User login

@@ -97,11 +97,28 @@ exports.updateNotice = async (req, res) => {
 };
 
 // Delete notice (Admin only)
+const fs = require('fs').promises
+
 exports.deleteNotice = async (req, res) => {
   try {
     const { id } = req.params;
     const deleted = await Notice.findByIdAndDelete(id);
     if (!deleted) return res.status(404).json({ success: false, message: 'Notice not found' });
+
+    // Delete attachment files from disk (best-effort)
+    if (deleted.attachments && deleted.attachments.length > 0) {
+      for (const att of deleted.attachments) {
+        try {
+          // att is stored like '/uploads/filename.ext' — map to disk path
+          const filename = att.split('/').pop()
+          const filePath = path.join(__dirname, '..', 'uploads', filename)
+          await fs.unlink(filePath)
+        } catch (e) {
+          // ignore missing file errors, log others
+          if (e.code && e.code !== 'ENOENT') console.warn('Failed to remove file', e)
+        }
+      }
+    }
 
     res.status(200).json({ success: true, message: 'Notice deleted' });
   } catch (error) {

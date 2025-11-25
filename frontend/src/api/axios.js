@@ -1,10 +1,10 @@
 import axios from 'axios'
 
 // Base URL should be the server origin (do NOT append '/api' here)
-const DEFAULT_API_BASE = 'http://localhost:3000'
+// Priority: VITE_API_BASE_URL -> window.location.origin (browser) -> fallback to empty string (relative)
 const apiBase =
   import.meta.env.VITE_API_BASE_URL ||
-  (typeof window !== 'undefined' ? window.location.origin : DEFAULT_API_BASE)
+  (typeof window !== 'undefined' ? window.location.origin : '')
 
 // Create axios instance with base URL
 const axiosInstance = axios.create({

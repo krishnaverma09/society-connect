@@ -43,6 +43,12 @@ Before running this project, make sure you have:
      JWT_EXPIRES_IN=7d
      BCRYPT_SALT_ROUNDS=10
      PORT=5000
+
+Additionally, set the `FRONTEND_URL` to the hosted frontend origin (for example your Vercel URL) so the server can allow CORS requests from the deployed frontend:
+
+```
+FRONTEND_URL=https://your-frontend.vercel.app
+```
      ```
 
 4. **Start MongoDB** (if running locally):
@@ -70,7 +76,7 @@ npm run dev
 npm start
 ```
 
-The server will start on `http://localhost:5000`
+The server will start on the port defined by `PORT` in your `.env` (default: `3000`).
 
 ## 📁 Project Structure
 
@@ -229,12 +235,12 @@ You can test the API using:
 Example cURL request:
 ```bash
 # Signup
-curl -X POST http://localhost:5000/api/auth/signup \
+curl -X POST <BACKEND_URL>/api/auth/signup \
   -H "Content-Type: application/json" \
   -d '{"name":"John Doe","email":"john@example.com","password":"password123","role":"resident","apartment":"A-101"}'
 
 # Login
-curl -X POST http://localhost:5000/api/auth/login \
+curl -X POST <BACKEND_URL>/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"john@example.com","password":"password123"}'
 ```
@@ -274,6 +280,17 @@ curl -X POST http://localhost:5000/api/auth/login \
   ```bash
   lsof -ti:5000 | xargs kill -9
   ```
+
+### CORS / Deployment
+If you deploy the frontend (for example, to Vercel) set the `FRONTEND_URL` environment variable in your backend host (Render/Heroku) to the deployed origin. This ensures the server permits requests from the frontend and prevents CORS rejections.
+
+On Render or similar, add environment variables:
+- `MONGO_URI` (required)
+- `JWT_SECRET` (required)
+- `PORT` (optional)
+- `FRONTEND_URL` (required for production)
+
+On Vercel (frontend), set `VITE_API_BASE_URL` to your backend origin (for example `https://your-backend.onrender.com`) so the frontend will call the correct API host.
 
 ## 📝 License
 
