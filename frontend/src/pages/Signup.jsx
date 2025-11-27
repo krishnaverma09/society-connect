@@ -5,13 +5,15 @@ import './Login.css'
 
 const Signup = () => {
   const navigate = useNavigate()
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     role: 'resident',
-    apartment: '',
+    apartmentNumber: '',
   })
+
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -29,24 +31,24 @@ const Signup = () => {
 
     try {
       const response = await axios.post('/api/auth/signup', formData)
-      
-      // Save token and user data to localStorage
+
+      // Save token and user data
       localStorage.setItem('token', response.data.token)
       localStorage.setItem('user', JSON.stringify(response.data.user))
-      
-      // Redirect to dashboard
+
       navigate('/dashboard')
     } catch (err) {
-      // Handle validation errors
-      if (err.original?.response?.data?.errors) {
-        const validationErrors = err.original.response.data.errors
-          .map(error => error.msg)
-          .join(', ');
-        setError(validationErrors);
+      // Express-validator errors
+      if (err.response?.data?.errors) {
+        const validationErrors = err.response.data.errors
+          .map((error) => error.msg)
+          .join(', ')
+        setError(validationErrors)
       } else {
-        // Handle other errors
-        const msg = err?.message || (err?.original && err.original.message) || 'Signup failed. Please try again.'
-        setError(msg);
+        setError(
+          err.response?.data?.message ||
+            'Signup failed. Please try again.'
+        )
       }
     } finally {
       setLoading(false)
@@ -65,6 +67,7 @@ const Signup = () => {
         {error && <div className="error-message">{error}</div>}
 
         <form onSubmit={handleSubmit} className="auth-form">
+          {/* Full Name */}
           <div className="form-group">
             <label htmlFor="name">Full Name</label>
             <input
@@ -78,6 +81,7 @@ const Signup = () => {
             />
           </div>
 
+          {/* Email */}
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input
@@ -91,6 +95,7 @@ const Signup = () => {
             />
           </div>
 
+          {/* Password */}
           <div className="form-group">
             <label htmlFor="password">Password</label>
             <input
@@ -105,6 +110,7 @@ const Signup = () => {
             />
           </div>
 
+          {/* Role Select */}
           <div className="form-group">
             <label htmlFor="role">Role</label>
             <select
@@ -119,20 +125,23 @@ const Signup = () => {
             </select>
           </div>
 
+          {/* Apartment Number – Only for residents */}
           {formData.role === 'resident' && (
             <div className="form-group">
-              <label htmlFor="apartment">Apartment Number</label>
+              <label htmlFor="apartmentNumber">Apartment Number</label>
               <input
                 type="text"
-                id="apartment"
-                name="apartment"
-                value={formData.apartment}
+                id="apartmentNumber"
+                name="apartmentNumber"
+                value={formData.apartmentNumber}
                 onChange={handleChange}
                 placeholder="e.g., A-101"
+                required
               />
             </div>
           )}
 
+          {/* Submit Button */}
           <button type="submit" className="submit-btn" disabled={loading}>
             {loading ? 'Creating Account...' : 'Sign Up'}
           </button>
