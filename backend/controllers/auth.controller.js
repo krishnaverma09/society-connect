@@ -10,42 +10,63 @@ const generateToken = (userId) => {
   });
 };
 
-// Signup Controller
+// =========================
+//      SIGNUP CONTROLLER
+// =========================
 exports.signup = async (req, res) => {
   try {
-    // Validate input
+    // Validate input fields using express-validator
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, email, password, role, apartment } = req.body;
+    const { name, email, password, role, apartmentNumber } = req.body;
 
-    // Check if user already exists
+    // 1️⃣ Check if user already exists (EMAIL)
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists with this email' });
     }
 
-    // Hash password
+    // 2️⃣ Apartment logic ONLY for residents
+    if (role === "resident") {
+
+      if (!apartmentNumber || apartmentNumber.trim() === "") {
+        return res.status(400).json({
+          success: false,
+          message: "Apartment number is required for residents."
+        });
+      }
+
+      // Check duplicate apartment
+      const existingApartment = await User.findOne({ apartmentNumber });
+      if (existingApartment) {
+        return res.status(400).json({
+          success: false,
+          message: "This apartment number is already registered."
+        });
+      }
+    }
+
+    // 3️⃣ Hash password
     const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS) || 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Create new user
-    const user = new User({
+    // 4️⃣ Create user
+    const user = await User.create({
       name,
       email,
       password: hashedPassword,
       role: role || 'resident',
-      apartment,
+      apartmentNumber: role === "resident" ? apartmentNumber : undefined,
     });
 
-    await user.save();
-
-    // Generate token
+    // 5️⃣ Generate token
     const token = generateToken(user._id);
 
-    res.status(201).json({
+    // 6️⃣ Send response
+    return res.status(201).json({
       message: 'User registered successfully',
       token,
       user: {
@@ -53,19 +74,33 @@ exports.signup = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        apartment: user.apartment,
+        apartmentNumber: user.apartmentNumber,
       },
     });
-  } catch (error) {
-    console.error('Signup error:', error);
-    res.status(500).json({ message: 'Server error during signup' });
+
+  } catch (err) {
+    console.error("Signup error:", err);
+
+    // Handle duplicate database error
+    if (err.code === 11000 && err.keyPattern && err.keyPattern.apartmentNumber) {
+      return res.status(400).json({
+        success: false,
+        message: "Apartment number already exists."
+      });
+    }
+
+    return res.status(500).json({ message: 'Server error during signup' });
   }
 };
 
-// Login Controller
+
+
+// =========================
+//      LOGIN CONTROLLER
+// =========================
 exports.login = async (req, res) => {
   try {
-    // Validate input
+    // Validate input fields
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -73,13 +108,13 @@ exports.login = async (req, res) => {
 
     const { email, password } = req.body;
 
-    // Find user by email
+    // Check email
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // Compare password
+    // Check password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid email or password' });
@@ -96,7 +131,7 @@ exports.login = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        apartment: user.apartment,
+        apartmentNumber: user.apartmentNumber,
       },
     });
   } catch (error) {

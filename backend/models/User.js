@@ -24,10 +24,15 @@ const userSchema = new mongoose.Schema(
       enum: ['resident', 'admin'],
       default: 'resident',
     },
-    apartment: {
-      type: String,
-      trim: true,
-    },
+   apartmentNumber: {
+  type: String,
+  required: function () {
+    return this.role === "resident";
+  },
+  unique: false,
+  trim: true
+},
+
   },
   {
     timestamps: true,
