@@ -17,3 +17,18 @@ body {
 #root {
   min-height: 100vh;
 }
+
+.app-layout {
+  display: flex;
+}
+
+.page-content {
+  margin-left: 70px; /* default sidebar width */
+  padding: 30px;
+  width: 100%;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+.sidebar.open ~ .page-content {
+  margin-left: 220px; /* expanded sidebar */
+}

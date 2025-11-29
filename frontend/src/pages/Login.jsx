@@ -34,12 +34,15 @@ const Login = () => {
       // Redirect to dashboard
       navigate('/dashboard')
     } catch (err) {
-      // axios interceptor returns { message, status, original }
-      const msg = err?.message || (err?.original && err.original.message) || 'Login failed. Please try again.'
-      setError(msg)
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError('Login failed. Please try again.');
+      }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
+
   }
 
   return (

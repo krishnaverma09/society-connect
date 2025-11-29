@@ -1,44 +1,47 @@
-const path = require('path')
-require('dotenv').config({ path: path.join(__dirname, '.env') })
-const express = require('express')
-const mongoose = require('mongoose')
-const cors = require('cors')
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
-// initialize app
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+
 const app = express();
 
-// ✅ CORS FIX — must be the FIRST middleware
-// Build allowed origins from env to keep configuration dynamic.
-const FRONTEND_URL = process.env.FRONTEND_URL || ''
+// Load environment variables
+const FRONTEND_URL = process.env.FRONTEND_URL || '';
 const allowedOrigins = new Set([
   'http://localhost:5173',
   'http://127.0.0.1:5173',
-])
+]);
 
-// FRONTEND_URL can be a comma-separated list (for multiple deploys)
+// Add production origins
 if (FRONTEND_URL) {
-  FRONTEND_URL.split(',').map((u) => u.trim()).forEach((u) => {
-    if (!u) return
-    // accept both http and https variants if protocol omitted
-    allowedOrigins.add(u)
-    if (!u.startsWith('http')) {
-      allowedOrigins.add(`https://${u}`)
-      allowedOrigins.add(`http://${u}`)
-    }
-  })
+  FRONTEND_URL.split(',')
+    .map((u) => u.trim())
+    .forEach((u) => {
+      if (!u) return;
+      allowedOrigins.add(u);
+
+      if (!u.startsWith('http')) {
+        allowedOrigins.add(`https://${u}`);
+        allowedOrigins.add(`http://${u}`);
+      }
+    });
 }
 
-// If running in production, require FRONTEND_URL to be set for security.
+// Production CORS check
 if (process.env.NODE_ENV === 'production') {
   if (!FRONTEND_URL) {
-    console.error('FATAL: FRONTEND_URL is required in production. Set FRONTEND_URL in your environment to the frontend origin (e.g. https://example.com)')
-    process.exit(1)
+    console.error(
+      '❌ FATAL: FRONTEND_URL is required in production. Set FRONTEND_URL to your frontend origin.'
+    );
+    process.exit(1);
   }
 }
 
-// If not running in production, allow all origins to prevent CORS issues during local dev.
+// CORS handling
 if (process.env.NODE_ENV !== 'production') {
-  console.log('CORS: development mode - allowing all origins')
+  console.log('CORS: development mode - allowing all origins');
   app.use(
     cors({
       origin: true,
@@ -47,63 +50,99 @@ if (process.env.NODE_ENV !== 'production') {
       credentials: true,
       optionsSuccessStatus: 200,
     })
-  )
+  );
 } else {
-  console.log('CORS allowed origins:', Array.from(allowedOrigins))
+  console.log('CORS allowed origins:', Array.from(allowedOrigins));
   app.use(
     cors({
       origin: function (origin, callback) {
-        // allow requests with no origin (like mobile apps, curl, Postman)
-        if (!origin) return callback(null, true)
-        if (allowedOrigins.has(origin)) return callback(null, true)
-        const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`
-        return callback(new Error(msg), false)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.has(origin)) return callback(null, true);
+        return callback(
+          new Error(
+            `The CORS policy for this site does not allow access from origin: ${origin}`
+          ),
+          false
+        );
       },
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
       allowedHeaders: ['Content-Type', 'Authorization'],
       credentials: true,
       optionsSuccessStatus: 200,
     })
-  )
+  );
 }
 
-// ✅ handle preflight (OPTIONS) manually for extra safety
 app.options('*', cors());
 
-// ✅ body parsers
+// Middleware to parse JSON & form data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ import routes AFTER cors + parsers
+// ROUTES IMPORT
 const authRoutes = require('./routes/auth.routes');
 const complaintRoutes = require('./routes/complaint.routes');
 const paymentRoutes = require('./routes/payment.routes');
 const notificationRoutes = require('./routes/notification.routes');
 const noticeRoutes = require('./routes/notice.routes');
+const meetingRoutes = require('./routes/meeting.routes');
 
-// ✅ routes
+// STATIC FILES
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// ==========================
+// REGISTER ALL ROUTES HERE
+// ==========================
 app.use('/api/auth', authRoutes);
 app.use('/api/complaints', complaintRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/notifications', notificationRoutes);
-// serve uploads folder
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-// mount notices
 app.use('/api/notices', noticeRoutes);
 
-// ✅ test route
+// ⭐ VERY IMPORTANT — meetings must load BEFORE server starts
+app.use('/api/meetings', meetingRoutes);
+
+// Test endpoint
 app.get('/', (req, res) => {
   res.json({ message: 'API is working!' });
 });
 
-// ✅ connect MongoDB + start server
-const PORT = process.env.PORT || 3000;
+// ==========================
+// MONGODB + SERVER INIT
+// ==========================
+let basePort = parseInt(process.env.PORT, 10) || 3000;
+const MAX_PORT = basePort + 10; // try up to 10 increments in dev
+
+function startServer(port) {
+  const server = app.listen(port, () => {
+    console.log(`🚀 Server running on port ${port}`);
+  });
+
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      if (process.env.NODE_ENV === 'production') {
+        console.error(`❌ Port ${port} in use. Set a free PORT env variable.`);
+        process.exit(1);
+      } else {
+        const nextPort = port + 1;
+        if (nextPort > MAX_PORT) {
+          console.error('❌ Exhausted port attempts. Unable to start server.');
+          process.exit(1);
+        }
+        console.warn(`⚠️ Port ${port} in use, retrying on ${nextPort}...`);
+        startServer(nextPort);
+      }
+    } else {
+      console.error('❌ Server error:', err);
+      process.exit(1);
+    }
+  });
+}
+
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log('✅ MongoDB Connected');
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    startServer(basePort);
   })
   .catch((err) => console.error('❌ MongoDB Error:', err));
-
-  

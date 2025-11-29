@@ -3,19 +3,16 @@ const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const User = require('../models/User');
 
-// Generate JWT Token
 const generateToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || '7d',
   });
 };
 
-// =========================
-//      SIGNUP CONTROLLER
-// =========================
+
 exports.signup = async (req, res) => {
   try {
-    // Validate input fields using express-validator
+   
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -23,13 +20,12 @@ exports.signup = async (req, res) => {
 
     const { name, email, password, role, apartmentNumber } = req.body;
 
-    // 1️⃣ Check if user already exists (EMAIL)
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists with this email' });
     }
 
-    // 2️⃣ Apartment logic ONLY for residents
+   
     if (role === "resident") {
 
       if (!apartmentNumber || apartmentNumber.trim() === "") {
@@ -39,7 +35,7 @@ exports.signup = async (req, res) => {
         });
       }
 
-      // Check duplicate apartment
+
       const existingApartment = await User.findOne({ apartmentNumber });
       if (existingApartment) {
         return res.status(400).json({
@@ -49,11 +45,11 @@ exports.signup = async (req, res) => {
       }
     }
 
-    // 3️⃣ Hash password
+
     const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS) || 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // 4️⃣ Create user
+
     const user = await User.create({
       name,
       email,
@@ -62,10 +58,10 @@ exports.signup = async (req, res) => {
       apartmentNumber: role === "resident" ? apartmentNumber : undefined,
     });
 
-    // 5️⃣ Generate token
+
     const token = generateToken(user._id);
 
-    // 6️⃣ Send response
+  
     return res.status(201).json({
       message: 'User registered successfully',
       token,
@@ -95,12 +91,9 @@ exports.signup = async (req, res) => {
 
 
 
-// =========================
-//      LOGIN CONTROLLER
-// =========================
 exports.login = async (req, res) => {
   try {
-    // Validate input fields
+   
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -108,19 +101,19 @@ exports.login = async (req, res) => {
 
     const { email, password } = req.body;
 
-    // Check email
+
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // Check password
+    
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // Generate token
+ 
     const token = generateToken(user._id);
 
     res.status(200).json({

@@ -8,14 +8,33 @@ import NoticesPage from './pages/NoticesPage';
 // Complaint Pages (Resident)
 import CreateComplaint from "./pages/Complaints/CreateComplaint";
 import MyComplaints from "./pages/Complaints/MyComplaints";
-import EditComplaint from "./pages/Complaints/EditComplaint";  // ✅ Correct Folder
+import EditComplaint from "./pages/Complaints/EditComplaint";
 
 // Admin Pages
 import AdminComplaints from "./pages/Admin/AdminComplaints";
 
+// Sidebar
+import Sidebar from "./components/Sidebar";
 import './App.css';
 
-// Protected Route Component
+// Meetings Feature Pages (NEW)
+import MeetingsPage from "./pages/Meetings/MeetingsPage";
+import MeetingDetails from "./pages/Meetings/MeetingDetails";
+import PollVotePage from "./pages/Meetings/PollVotePage";
+import PollResultsPage from "./pages/Meetings/PollResultsPage";
+import CreateMeeting from "./pages/Meetings/CreateMeeting";
+import CreatePoll from "./pages/Meetings/CreatePoll";
+import EditMeeting from "./pages/Meetings/EditMeeting";
+
+
+// ⭐ Admin-only wrapper (added but doesn’t break any old code)
+const AdminOnly = ({ children }) => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  return user?.role === "admin" ? children : <Navigate to="/meetings" replace />;
+};
+
+
+// ⭐ Protected Route (original)
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token');
 
@@ -26,40 +45,60 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+// ⭐ Layout wrapper (original)
+const ProtectedLayout = ({ children }) => {
+  return (
+    <div className="app-layout">
+      <Sidebar />
+      <div className="page-content">{children}</div>
+    </div>
+  );
+};
+
 function App() {
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
 
-        {/* Public Routes */}
+        {/* ---------------- PUBLIC ROUTES ---------------- */}
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-        {/* Protected Routes */}
-        <Route 
-          path="/dashboard" 
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } 
-        />
 
+        {/* ---------------- PROTECTED ROUTES ---------------- */}
+        
+        {/* Dashboard */}
         <Route
-          path="/notices"
+          path="/dashboard"
           element={
             <ProtectedRoute>
-              <NoticesPage />
+              <ProtectedLayout>
+                <Dashboard />
+              </ProtectedLayout>
             </ProtectedRoute>
           }
         />
 
-        {/* Resident Complaint Routes */}
+        {/* Notices */}
+        <Route
+          path="/notices"
+          element={
+            <ProtectedRoute>
+              <ProtectedLayout>
+                <NoticesPage />
+              </ProtectedLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Resident Complaints */}
         <Route
           path="/complaints/create"
           element={
             <ProtectedRoute>
-              <CreateComplaint />
+              <ProtectedLayout>
+                <CreateComplaint />
+              </ProtectedLayout>
             </ProtectedRoute>
           }
         />
@@ -68,30 +107,128 @@ function App() {
           path="/complaints/my"
           element={
             <ProtectedRoute>
-              <MyComplaints />
+              <ProtectedLayout>
+                <MyComplaints />
+              </ProtectedLayout>
             </ProtectedRoute>
           }
         />
 
-        {/* Resident Edit Complaint Route */}
         <Route
           path="/complaints/edit/:id"
           element={
             <ProtectedRoute>
-              <EditComplaint />
+              <ProtectedLayout>
+                <EditComplaint />
+              </ProtectedLayout>
             </ProtectedRoute>
           }
         />
 
-        {/* Admin Complaint Routes */}
+        {/* Admin Complaints */}
         <Route
           path="/admin/complaints"
           element={
             <ProtectedRoute>
-              <AdminComplaints />
+              <ProtectedLayout>
+                <AdminComplaints />
+              </ProtectedLayout>
             </ProtectedRoute>
           }
         />
+
+        {/* ---------------- MEETINGS ROUTES (ADDED) ---------------- */}
+
+        {/* Meetings List */}
+        <Route
+          path="/meetings"
+          element={
+            <ProtectedRoute>
+              <ProtectedLayout>
+                <MeetingsPage />
+              </ProtectedLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Create Meeting (Admin Only) */}
+        <Route
+          path="/meetings/create"
+          element={
+            <ProtectedRoute>
+              <ProtectedLayout>
+                <AdminOnly>
+                  <CreateMeeting />
+                </AdminOnly>
+              </ProtectedLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Meeting Details */}
+        <Route
+          path="/meetings/:id"
+          element={
+            <ProtectedRoute>
+              <ProtectedLayout>
+                <MeetingDetails />
+              </ProtectedLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Resident Vote Page */}
+        <Route
+          path="/meetings/:id/vote"
+          element={
+            <ProtectedRoute>
+              <ProtectedLayout>
+                <PollVotePage />
+              </ProtectedLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Poll Results (Admin Only) */}
+        <Route
+          path="/meetings/:id/results"
+          element={
+            <ProtectedRoute>
+              <ProtectedLayout>
+                <AdminOnly>
+                  <PollResultsPage />
+                </AdminOnly>
+              </ProtectedLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Create Poll (Admin Only) */}
+        <Route
+          path="/meetings/:id/poll/create"
+          element={
+            <ProtectedRoute>
+              <ProtectedLayout>
+                <AdminOnly>
+                  <CreatePoll />
+                </AdminOnly>
+              </ProtectedLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+        path="/meetings/:id/edit"
+        element={
+          <ProtectedRoute>
+            <ProtectedLayout>
+              <AdminOnly>
+                <EditMeeting />
+              </AdminOnly>
+            </ProtectedLayout>
+          </ProtectedRoute>
+        }
+/>
 
       </Routes>
     </Router>
