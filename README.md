@@ -370,6 +370,9 @@ For any queries or issues:
 ✅ Database seeding for testing  
 ✅ Complete documentation  
 
+
+HOSTED LINK
+--> https://society-connect-five.vercel.app/
 ---
 
 **Happy Coding! 🚀**
