@@ -1,10 +1,8 @@
 import { useState } from "react";
 import axios from "../../api/axios";
-import { useNavigate } from "react-router-dom";
+import "../../css/MeetingForms.css";
 
-export default function CreateMeeting() {
-  const navigate = useNavigate();
-
+export default function CreateMeeting({ onNavigate }) {
   const [form, setForm] = useState({
     title: "",
     agenda: "",
@@ -21,7 +19,7 @@ export default function CreateMeeting() {
     try {
       await axios.post("/api/meetings", form);
       alert("Meeting created!");
-      navigate("/meetings");
+      if (onNavigate) onNavigate('meetings:list');
     } catch (err) {
       alert("Failed to create meeting");
       console.error(err);
@@ -29,45 +27,80 @@ export default function CreateMeeting() {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Create Meeting (Admin)</h1>
+    <div className="meeting-form-wrap">
+      <div className="meeting-form-container">
+        <button className="back-button" onClick={() => onNavigate && onNavigate('meetings:list')}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19 12H5M5 12l7 7M5 12l7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Back to Meetings
+        </button>
 
-      <form onSubmit={submit}>
-        <input
-          type="text"
-          name="title"
-          placeholder="Title"
-          value={form.title}
-          onChange={onChange}
-          required
-        /><br />
+        <div className="meeting-form-header">
+          <h1 className="meeting-form-title">Create Meeting</h1>
+          <p className="meeting-form-subtitle">Schedule a new meeting for residents</p>
+        </div>
 
-        <textarea
-          name="agenda"
-          placeholder="Agenda"
-          value={form.agenda}
-          onChange={onChange}
-          required
-        /><br />
+        <form onSubmit={submit} className="meeting-form">
+          <div className="form-group">
+            <label className="form-label">Meeting Title *</label>
+            <input
+              type="text"
+              name="title"
+              placeholder="Enter meeting title"
+              value={form.title}
+              onChange={onChange}
+              className="form-input"
+              required
+            />
+          </div>
 
-        <input
-          type="datetime-local"
-          name="date"
-          value={form.date}
-          onChange={onChange}
-          required
-        /><br />
+          <div className="form-group">
+            <label className="form-label">Agenda *</label>
+            <textarea
+              name="agenda"
+              placeholder="Describe the meeting agenda"
+              value={form.agenda}
+              onChange={onChange}
+              className="form-textarea"
+              required
+            />
+          </div>
 
-        <input
-          type="text"
-          name="location"
-          placeholder="Location"
-          value={form.location}
-          onChange={onChange}
-        /><br />
+          <div className="form-group">
+            <label className="form-label">Date & Time *</label>
+            <input
+              type="datetime-local"
+              name="date"
+              value={form.date}
+              onChange={onChange}
+              className="form-input"
+              required
+            />
+          </div>
 
-        <button type="submit">Create Meeting</button>
-      </form>
+          <div className="form-group">
+            <label className="form-label">Location</label>
+            <input
+              type="text"
+              name="location"
+              placeholder="Enter meeting location"
+              value={form.location}
+              onChange={onChange}
+              className="form-input"
+            />
+          </div>
+
+          <div className="form-actions">
+            <button type="button" className="btn-secondary" onClick={() => onNavigate && onNavigate('meetings:list')}>
+              Cancel
+            </button>
+            <button type="submit" className="btn-primary">
+              Create Meeting
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

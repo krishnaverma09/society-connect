@@ -33,6 +33,7 @@ const isAdmin = () => {
 export default function Home() {
   const [view, setView] = useState('dashboard')
   const [editingComplaintId, setEditingComplaintId] = useState(null)
+  const [selectedMeetingId, setSelectedMeetingId] = useState(null)
 
   const handleNavigate = (next) => {
     setView(next)
@@ -60,19 +61,19 @@ export default function Home() {
       case 'complaints:admin':
         return isAdmin() ? <AdminComplaints /> : <ComplaintsHome />
       case 'meetings:list':
-        return <MeetingsPage />
+        return <MeetingsPage onNavigate={handleNavigate} setSelectedMeetingId={setSelectedMeetingId} />
       case 'meetings:create':
-        return isAdmin() ? <CreateMeeting /> : <MeetingsPage />
+        return isAdmin() ? <CreateMeeting onNavigate={handleNavigate} /> : <MeetingsPage onNavigate={handleNavigate} setSelectedMeetingId={setSelectedMeetingId} />
       case 'meetings:details':
-        return <MeetingDetails />
+        return <MeetingDetails meetingId={selectedMeetingId} onNavigate={handleNavigate} setSelectedMeetingId={setSelectedMeetingId} />
       case 'meetings:vote':
-        return <PollVotePage />
+        return <PollVotePage meetingId={selectedMeetingId} onNavigate={handleNavigate} />
       case 'meetings:results':
-        return isAdmin() ? <PollResultsPage /> : <MeetingsPage />
+        return isAdmin() ? <PollResultsPage meetingId={selectedMeetingId} onNavigate={handleNavigate} /> : <MeetingsPage onNavigate={handleNavigate} setSelectedMeetingId={setSelectedMeetingId} />
       case 'meetings:poll:create':
-        return isAdmin() ? <CreatePoll /> : <MeetingsPage />
+        return isAdmin() ? <CreatePoll meetingId={selectedMeetingId} onNavigate={handleNavigate} /> : <MeetingsPage onNavigate={handleNavigate} setSelectedMeetingId={setSelectedMeetingId} />
       case 'meetings:edit':
-        return isAdmin() ? <EditMeeting /> : <MeetingsPage />
+        return isAdmin() ? <EditMeeting meetingId={selectedMeetingId} onNavigate={handleNavigate} /> : <MeetingsPage onNavigate={handleNavigate} setSelectedMeetingId={setSelectedMeetingId} />
       case 'payments:resident':
         return <ResidentPaymentsPage />
       case 'payments:admin':

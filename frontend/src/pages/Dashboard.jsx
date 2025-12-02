@@ -51,8 +51,11 @@ const Dashboard = ({ onNavigate }) => {
           .slice(0, 3)
         setAnnouncements(recentAnnouncements)
         
-        // Meetings
-        const meetingsData = results[3].status === 'fulfilled' ? (results[3].value.data.meetings || []) : []
+        // Meetings — handle both array and wrapped { meetings }
+        const rawMeetings = results[3].status === 'fulfilled' ? results[3].value.data : []
+        const meetingsData = Array.isArray(rawMeetings)
+          ? rawMeetings
+          : (rawMeetings.meetings || [])
         const recentMeetings = [...meetingsData]
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
           .slice(0, 3)
