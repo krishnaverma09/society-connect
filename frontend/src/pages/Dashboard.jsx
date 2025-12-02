@@ -1,122 +1,177 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import axios from '../api/axios'
-import Navbar from '../components/Navbar'
-import './Dashboard.css'
+import { User as UserIcon } from 'lucide-react'
+import '../css/Dashboard.css'
 
-const Dashboard = () => {
-  const [complaints, setComplaints] = useState([])
+const Dashboard = ({ onNavigate }) => {
+  const user = JSON.parse(localStorage.getItem('user') || '{}')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const user = JSON.parse(localStorage.getItem('user') || '{}')
+
+  // aggregated data
+  const [openComplaints, setOpenComplaints] = useState(0)
+  const [pendingComplaints, setPendingComplaints] = useState(0)
+  const [inProgressComplaints, setInProgressComplaints] = useState(0)
+  const [recentNoticesCount, setRecentNoticesCount] = useState(0)
+  const [announcements, setAnnouncements] = useState([])
+  const [upcomingMeetings, setUpcomingMeetings] = useState([])
+  const [recentComplaints, setRecentComplaints] = useState([])
 
   useEffect(() => {
-    fetchComplaints()
+    const fetchAll = async () => {
+      setLoading(true)
+      setError('')
+      try {
+        const today = new Date()
+        const results = await Promise.allSettled([
+          axios.get('/api/complaints'),
+          axios.get('/api/notices'),
+          axios.get('/api/payments'),
+          axios.get('/api/meetings').catch(() => ({ data: { meetings: [] } })),
+        ])
+
+        // Complaints
+        const complaintsData = results[0].status === 'fulfilled' ? (results[0].value.data.complaints || []) : []
+        const pending = complaintsData.filter(c => (c.status || '').toLowerCase() === 'pending').length
+        const inProgress = complaintsData.filter(c => (c.status || '').toLowerCase() === 'in-progress' || (c.status || '').toLowerCase() === 'in progress').length
+        const totalOpen = pending + inProgress
+        setOpenComplaints(totalOpen)
+        setPendingComplaints(pending)
+        setInProgressComplaints(inProgress)
+        const recent = [...complaintsData]
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .slice(0, 3)
+        setRecentComplaints(recent)
+
+        // Notices -> announcements
+        const noticesData = results[1].status === 'fulfilled' ? (results[1].value.data.notices || results[1].value.data || []) : []
+        setRecentNoticesCount(noticesData.length)
+        const recentAnnouncements = [...noticesData]
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .slice(0, 3)
+        setAnnouncements(recentAnnouncements)
+        
+        // Meetings
+        const meetingsData = results[3].status === 'fulfilled' ? (results[3].value.data.meetings || []) : []
+        const recentMeetings = [...meetingsData]
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .slice(0, 3)
+        setUpcomingMeetings(recentMeetings)
+      } catch (e) {
+        setError(e.message || 'Failed to load dashboard data')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchAll()
   }, [])
 
-  const fetchComplaints = async () => {
-    try {
-      setLoading(true)
-      const response = await axios.get('/api/complaints')
-      setComplaints(response.data.complaints || [])
-      setError('')
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to fetch complaints')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Pending':
-        return '#ffc107'
-      case 'In Progress':
-        return '#17a2b8'
-      case 'Resolved':
-        return '#28a745'
-      default:
-        return '#6c757d'
-    }
-  }
+  const isAdmin = (user?.role || '').toLowerCase() === 'admin'
 
   return (
-    <div className="dashboard">
-      <Navbar />
-      
-      <div className="dashboard-container">
-        <div className="dashboard-header">
+    <div className="dashboard-wrapper">
+      <div className="dashboard-topbar">
+        <div className="topbar-left">
           <h1>Dashboard</h1>
-          <p>Welcome to your SocietyConnect dashboard</p>
+          {user?.role && (
+            <span className="role-badge">{user.role === 'admin' ? 'Admin' : 'Resident'}</span>
+          )}
         </div>
+        <div className="topbar-center">
+          <p className="greeting">Welcome back, <span className="user-name">{user?.name || 'User'}</span>!</p>
+        </div>
+        <div className="topbar-right">
+          <button 
+            className="avatar" 
+            title={user?.name || 'User'}
+            onClick={() => onNavigate?.('profile')}
+            aria-label="Go to profile"
+          >
+            <UserIcon size={20} />
+          </button>
+        </div>
+      </div>
 
-        <div className="dashboard-stats">
-          <div className="stat-card">
-            <h3>{complaints.length}</h3>
-            <p>Total Complaints</p>
-          </div>
-          <div className="stat-card">
-            <h3>{complaints.filter(c => c.status === 'Pending').length}</h3>
-            <p>Pending</p>
-          </div>
-          <div className="stat-card">
-            <h3>{complaints.filter(c => c.status === 'In Progress').length}</h3>
-            <p>In Progress</p>
-          </div>
-          <div className="stat-card">
-            <h3>{complaints.filter(c => c.status === 'Resolved').length}</h3>
-            <p>Resolved</p>
+      {error && <div className="dash-error">{error}</div>}
+
+      <div className="cards-row">
+        <div className="metric-card">
+          <div className="metric-value">{openComplaints}</div>
+          <div className="metric-label">Open Complaints</div>
+          <div className="metric-breakdown">
+            <span className="breakdown-item">Pending: {pendingComplaints}</span>
+            <span className="breakdown-separator">•</span>
+            <span className="breakdown-item">In Progress: {inProgressComplaints}</span>
           </div>
         </div>
+        <div className="metric-card">
+          <div className="metric-value">{recentNoticesCount}</div>
+          <div className="metric-label">Recent Notices</div>
+        </div>
+      </div>
 
-        <div className="complaints-section">
-          <h2>
-            {user.role === 'admin' ? 'All Complaints' : 'My Complaints'}
-          </h2>
-
+      <div className="grid-two">
+        <div className="panel announcements">
+          <div className="panel-head">
+            <h2>Recent Announcements</h2>
+            <button className="link-btn" onClick={() => onNavigate?.('notices')}>View All</button>
+          </div>
           {loading ? (
-            <div className="loading">Loading complaints...</div>
-          ) : error ? (
-            <div className="error-message">{error}</div>
-          ) : complaints.length === 0 ? (
-            <div className="no-data">
-              <p>No complaints found.</p>
-              {user.role === 'resident' && (
-                <p className="hint">Create your first complaint to get started!</p>
-              )}
-            </div>
+            <div className="loading-sm">Loading...</div>
+          ) : announcements.length === 0 ? (
+            <div className="empty">No announcements</div>
           ) : (
-            <div className="complaints-grid">
-              {complaints.map((complaint) => (
-                <div key={complaint._id} className="complaint-card">
-                  <div className="complaint-header">
-                    <h3>{complaint.title}</h3>
-                    <span 
-                      className="status-badge"
-                      style={{ backgroundColor: getStatusColor(complaint.status) }}
-                    >
-                      {complaint.status}
-                    </span>
-                  </div>
-                  <p className="complaint-description">{complaint.description}</p>
-                  <div className="complaint-footer">
-                    {user.role === 'admin' && complaint.resident && (
-                      <p className="complaint-meta">
-                        <strong>Resident:</strong> {complaint.resident.name}
-                        {complaint.resident.apartment && ` (${complaint.resident.apartment})`}
-                      </p>
-                    )}
-                    {complaint.assignedTo && (
-                      <p className="complaint-meta">
-                        <strong>Assigned To:</strong> {complaint.assignedTo.name}
-                      </p>
-                    )}
-                    <p className="complaint-date">
-                      Created: {new Date(complaint.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
+            <ul className="list">
+              {announcements.map(a => (
+                <li key={a._id} className="list-item">
+                  <div className="title">{a.title}</div>
+                  <div className="meta">Published: {new Date(a.createdAt).toLocaleDateString()}</div>
+                </li>
               ))}
-            </div>
+            </ul>
+          )}
+        </div>
+      </div>
+
+      <div className="grid-two">
+        <div className="panel meetings">
+          <div className="panel-head">
+            <h2>Upcoming Meetings</h2>
+            <button className="link-btn" onClick={() => onNavigate?.('meetings:list')}>View All</button>
+          </div>
+          {loading ? (
+            <div className="loading-sm">Loading...</div>
+          ) : upcomingMeetings.length === 0 ? (
+            <div className="empty">No upcoming meetings</div>
+          ) : (
+            <ul className="list">
+              {upcomingMeetings.map(m => (
+                <li key={m._id} className="list-item meeting-item">
+                  <div className="title">{m.title || m.name}</div>
+                  <div className="meta">{new Date(m.date || m.startDate || m.scheduledAt).toLocaleString()}</div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <div className="panel complaints">
+          <h2>New Complaints</h2>
+          {loading ? (
+            <div className="loading-sm">Loading...</div>
+          ) : recentComplaints.length === 0 ? (
+            <div className="empty">No complaints</div>
+          ) : (
+            <ul className="list">
+              {recentComplaints.map(c => (
+                <li key={c._id} className="list-item complaint-item">
+                  <div className="title">{c.title}</div>
+                  <div className="meta-row">
+                    <span className={`status-pill status-${(c.status || 'unknown').replace(/\s+/g,'-').toLowerCase()}`}>{c.status || 'Unknown'}</span>
+                    <span className="meta">{new Date(c.createdAt).toLocaleDateString()}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       </div>

@@ -1,14 +1,17 @@
 import React from 'react'
-import './NoticeCard.css'
+import '../css/NoticeCard.css'
 
 const NoticeCard = ({ notice, onView }) => {
   const date = new Date(notice.createdAt).toLocaleDateString()
+  const category = (notice.category || '').toLowerCase()
 
   return (
     <div className="notice-card">
       <div className="notice-card-head">
         <h3 className="notice-card-title">{notice.title}</h3>
-        <span className="notice-card-badge">{notice.category}</span>
+        <span className="notice-card-badge" data-category={category}>
+          {notice.category}
+        </span>
       </div>
       <p className="notice-card-desc">{notice.description}</p>
       <div className="notice-card-foot">

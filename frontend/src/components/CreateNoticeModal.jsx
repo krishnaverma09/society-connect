@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { createNotice } from '../api/notices'
-import './CreateNoticeModal.css'
+import '../css/CreateNoticeModal.css'
 
 const CreateNoticeModal = ({ onClose, onCreated }) => {
   const [title, setTitle] = useState('')

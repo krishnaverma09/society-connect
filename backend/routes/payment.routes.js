@@ -3,11 +3,16 @@ const { body } = require('express-validator');
 const paymentController = require('../controllers/payment.controller');
 const authMiddleware = require('../middleware/auth.middleware');
 const roleMiddleware = require('../middleware/role.middleware');
+const upload = require('../utils/upload');
 
 const router = express.Router();
 
 // All routes require authentication
 router.use(authMiddleware);
+
+// ==========================================
+// OLD ROUTES (KEEPED AS THEY ARE)
+// ==========================================
 
 // GET /api/payments - Get all payments (admin sees all, resident sees own)
 router.get('/', paymentController.getPayments);
@@ -28,5 +33,25 @@ router.post(
   ],
   paymentController.createPayment
 );
+
+// ==========================================
+// NEW ROUTES (MANUAL PAYMENT + SCREENSHOT)
+// ==========================================
+
+// Resident: Submit payment + screenshot
+router.post(
+  '/submit',
+  upload.single('proofImage'),
+  paymentController.submitPayment
+);
+
+// Resident: View my payment history
+router.get('/my-payments', paymentController.getMyPayments);
+
+// Admin: See ALL payments (with screenshots)
+router.get('/all', paymentController.getAllPayments);
+
+// Admin: Update status (Pending / Paid / Unpaid)
+router.put('/update/:id', paymentController.updateStatus);
 
 module.exports = router;

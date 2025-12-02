@@ -88,6 +88,7 @@ const noticeRoutes = require('./routes/notice.routes');
 const meetingRoutes = require('./routes/meeting.routes');
 
 // STATIC FILES
+// ⭐ IMPORTANT: This serves uploaded images including payment screenshots
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ==========================
@@ -99,7 +100,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/notices', noticeRoutes);
 
-// ⭐ VERY IMPORTANT — meetings must load BEFORE server starts
+// meetings route
 app.use('/api/meetings', meetingRoutes);
 
 // Test endpoint

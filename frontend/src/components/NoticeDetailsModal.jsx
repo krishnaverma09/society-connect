@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import './NoticeDetailsModal.css'
+import '../css/NoticeDetailsModal.css'
 import { deleteNotice } from '../api/notices'
 
 const NoticeDetailsModal = ({ notice, onClose, onDeleted, onEdit }) => {
@@ -8,6 +8,7 @@ const NoticeDetailsModal = ({ notice, onClose, onDeleted, onEdit }) => {
   const [isDeleting, setIsDeleting] = useState(false)
   const [error, setError] = useState('')
   const API_BASE = import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : '')
+  const category = (notice.category || '').toLowerCase()
 
   const handleDelete = async () => {
     if (isDeleting) return
@@ -32,8 +33,8 @@ const NoticeDetailsModal = ({ notice, onClose, onDeleted, onEdit }) => {
           <div>
             <h2 className="scd-title">{notice.title}</h2>
             <p className="scd-meta">
-              <span className="scd-badge">{notice.category}</span>
-              {new Date(notice.createdAt).toLocaleString()}
+              <span className="scd-badge" data-category={category}>{notice.category}</span>
+              <span>{new Date(notice.createdAt).toLocaleDateString()}</span>
             </p>
           </div>
           <div className="scd-actions">
@@ -59,7 +60,9 @@ const NoticeDetailsModal = ({ notice, onClose, onDeleted, onEdit }) => {
               <ul>
         {notice.attachments.map((att, idx) => (
                   <li key={idx}>
-          <a href={`${API_BASE}${att}`} target="_blank" rel="noreferrer">View attachment {idx + 1}</a>
+          <a href={`${API_BASE}${att}`} target="_blank" rel="noreferrer">
+            📎 View attachment {idx + 1}
+          </a>
                   </li>
                 ))}
               </ul>
