@@ -1,0 +1,375 @@
+.resident-payments-wrapper {
+  background: #f5f0e6;
+  min-height: 100vh;
+  padding: 32px 40px;
+}
+
+.resident-payments-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 28px 0;
+}
+
+/* Payment History Section */
+.payment-history-section {
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 32px;
+}
+
+.payment-history-header {
+  background: #ffffff;
+  padding: 20px 24px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.payment-history-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.payment-history-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.payment-history-table thead {
+  background: #ffffff;
+}
+
+.payment-history-table th {
+  padding: 16px 24px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.payment-history-table tbody tr {
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.2s;
+}
+
+.payment-history-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.payment-history-table td {
+  padding: 20px 24px;
+  font-size: 15px;
+  color: #334155;
+}
+
+/* Resident Info Cell */
+.resident-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.resident-cell-name {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.resident-cell-email {
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* Status Badge for Resident */
+.resident-payment-status {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.resident-payment-status.status-paid {
+  background: #d1f4e0;
+  color: #0f5132;
+}
+
+.resident-payment-status.status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.resident-payment-status.status-unpaid {
+  background: #ffe5e5;
+  color: #c62828;
+}
+
+/* Proof Link */
+.resident-proof-link {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.resident-proof-link:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+/* Floating Pay Button */
+.pay-floating-btn {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  background: #a8d5e2;
+  color: #ffffff;
+  border: none;
+  border-radius: 50px;
+  padding: 16px 28px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(168, 213, 226, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  z-index: 100;
+}
+
+.pay-floating-btn:hover {
+  background: #8fc4d4;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(168, 213, 226, 0.5);
+}
+
+.pay-floating-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Payment Modal */
+.payment-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.payment-modal-content {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.payment-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 28px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.payment-modal-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.payment-modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #666;
+  transition: color 0.2s;
+}
+
+.payment-modal-close:hover {
+  color: #1a1a1a;
+}
+
+.payment-modal-close svg {
+  width: 24px;
+  height: 24px;
+}
+
+.payment-error-message {
+  background: #ffe5e5;
+  color: #c62828;
+  padding: 12px 28px;
+  margin: 0;
+  border-left: 4px solid #c62828;
+}
+
+.payment-form {
+  padding: 28px;
+}
+
+.payment-form-group {
+  margin-bottom: 24px;
+}
+
+.payment-form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.payment-form-group input[type="month"],
+.payment-form-group input[type="text"] {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.payment-form-group input[type="month"]:focus,
+.payment-form-group input[type="text"]:focus {
+  border-color: #a6724c;
+}
+
+.payment-form-group input[type="file"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.payment-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.payment-btn-cancel,
+.payment-btn-submit {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.payment-btn-cancel {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.payment-btn-cancel:hover {
+  background: #d0d0d0;
+}
+
+.payment-btn-submit {
+  background: #a6724c;
+  color: #ffffff;
+}
+
+.payment-btn-submit:hover {
+  background: #8f5f3d;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(166, 114, 76, 0.3);
+}
+
+/* Empty State */
+.no-payment-history {
+  text-align: center;
+  padding: 60px 20px;
+  color: #94a3b8;
+  font-size: 16px;
+}
+
+/* Image Modal */
+.image-modal-body {
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f8fafc;
+  max-height: calc(90vh - 100px);
+  overflow: auto;
+}
+
+.proof-image {
+  max-width: 100%;
+  max-height: calc(90vh - 150px);
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .resident-payments-wrapper {
+    padding: 20px 16px;
+  }
+
+  .resident-payments-title {
+    font-size: 24px;
+  }
+
+  .payment-history-section {
+    overflow-x: auto;
+  }
+
+  .payment-history-table {
+    min-width: 600px;
+  }
+
+  .payment-history-table th,
+  .payment-history-table td {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+
+  .pay-floating-btn {
+    bottom: 20px;
+    right: 20px;
+    padding: 14px 20px;
+    font-size: 14px;
+  }
+
+  .payment-modal-content {
+    margin: 10px;
+  }
+
+  .payment-modal-actions {
+    flex-direction: column;
+  }
+
+  .payment-btn-cancel,
+  .payment-btn-submit {
+    width: 100%;
+  }
+}

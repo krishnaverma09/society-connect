@@ -1,0 +1,192 @@
+/* Sidebar container */
+.sidebar {
+  width: 260px;
+  background: #d4b896;
+  height: 100vh;
+  padding: 0;
+  box-sizing: border-box;
+  transition: width 0.3s ease-in-out;
+  position: sticky;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Collapsed sidebar */
+.sidebar:not(.open) {
+  width: 80px;
+}
+
+/* Sidebar Header with Logo and Brand */
+.sidebar-header {
+  padding: 24px 20px;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-circle {
+  width: 48px;
+  height: 48px;
+  background: #a89968;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.brand-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2c2416;
+  white-space: nowrap;
+}
+
+/* Toggle button */
+.toggle-btn {
+  width: calc(100% - 32px);
+  background: #a6724c;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin: 16px 16px;
+  transition: background 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-btn:hover {
+  background: #8f5f3d;
+}
+
+/* Menu list */
+.menu-list {
+  margin: 0;
+  padding: 16px;
+  list-style: none;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Menu item */
+.menu-item {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.menu-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #2c2416;
+  border-radius: 10px;
+  transition: all 0.2s;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  text-align: left;
+}
+
+/* Icons */
+.menu-item .icon {
+  font-size: 20px;
+  width: 24px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hover */
+.menu-button:hover {
+  background: rgba(166, 114, 76, 0.2);
+}
+
+/* Active route */
+.menu-item.active .menu-button {
+  background: #a6724c;
+  color: white;
+  box-shadow: 0 2px 8px rgba(166, 114, 76, 0.3);
+}
+
+/* Sidebar Footer with Logout */
+.sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid rgba(0,0,0,0.1);
+  margin-top: auto;
+}
+
+.logout-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #2c2416;
+  border-radius: 10px;
+  transition: all 0.2s;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  text-align: left;
+}
+
+.logout-button:hover {
+  background: rgba(166, 114, 76, 0.2);
+}
+
+/* Hide labels when collapsed */
+.sidebar:not(.open) .label {
+  display: none;
+}
+
+.sidebar:not(.open) .brand-name {
+  display: none;
+}
+
+/* Center icons when collapsed */
+.sidebar:not(.open) .menu-button {
+  justify-content: center;
+  padding: 14px 8px;
+}
+
+.sidebar:not(.open) .logout-button {
+  justify-content: center;
+  padding: 14px 8px;
+}
+
+.sidebar:not(.open) .toggle-btn {
+  width: calc(100% - 16px);
+  margin: 16px 8px;
+}
+
+.sidebar:not(.open) .sidebar-header {
+  padding: 24px 16px;
+}
+
+/* Responsive mobile behavior */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    z-index: 1000;
+    height: 100vh;
+  }
+}
